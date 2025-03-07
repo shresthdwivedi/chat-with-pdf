@@ -1,14 +1,70 @@
-import { Card, CardDescription, CardHeader } from '@/components/ui/card'
-import React from 'react'
+'use client';
 
-type Props = {}
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Progress } from '@/components/ui/progress';
+import { Textarea } from '@/components/ui/textarea'
+import { Database, LucideLoader2, MoveUp, RefreshCcw } from 'lucide-react'
+import { useEffect, useState } from 'react'
 
-const VectorDBPage = (props: Props) => {
+const VectorDBPage = () => {
+
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect
+
   return (
     <main className='flex flex-col min-h-screen items-center justify-center p-24'>
       <Card>
-        <CardHeader>Vector Database</CardHeader>
-        <CardDescription>Add new documents to your vector DB</CardDescription>
+        <CardHeader>
+          <CardTitle>Update Knowledge Base</CardTitle>
+          <CardDescription>Add new documents to your vector DB</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-3 gap-4">
+            <div className="col-span-2 grid gap-4 border rounded-lg p-6">
+              <div className='gap-2 relative'>
+                <Button className='absolute -top-4 -right-4' variant={'ghost'} size={'icon'}>
+                  <RefreshCcw />
+                </Button>
+                <Label>Files List:</Label>
+                <Textarea readOnly className='resize-none min-h-24 border p-3 shadow-none disabled:cursor-not-allowed focus-visible:ring-0 text-sm text-muted-foreground'/>
+              </div>
+              <div className='grid grid-cols-2 gap-4'>
+                <div className="grid gap-2">
+                  <Label>
+                    Index Name
+                  </Label>
+                  <Input placeholder="index name" disabled={isLoading} className='disabled:cursor-not-allowed'/>
+                </div>
+                <div className="grid gap-2">
+                  <Label>
+                    Namespace
+                  </Label>
+                  <Input placeholder="namespace" disabled={isLoading} className='disabled:cursor-not-allowed'/>
+                </div>
+              </div>
+            </div>
+            <Button variant={"ghost"} className="w-full h-full cursor-pointer disabled:cursor-not-allowed" disabled={isLoading} >
+              <span className='flex flex-row'>
+                <Database className='size-24 stroke-red-800'/>
+                <MoveUp className='size-8 stroke-red-800'/>
+              </span>
+            </Button>
+          </div>
+          {isLoading && (
+            <div className='mt-4'>
+              <Label>File Name:</Label>
+              <div className='flex flex-row items-center gap-4'>
+                <Progress value={80} className=''/>
+                <LucideLoader2 className='stroke-red-800 animate-spin'/>
+              </div>
+            </div>
+            )
+          }
+        </CardContent>
       </Card>
     </main>
   )
