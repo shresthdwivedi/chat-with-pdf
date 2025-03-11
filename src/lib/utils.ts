@@ -1,7 +1,7 @@
 import { Pinecone } from "@pinecone-database/pinecone"
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
-import { Document } from "langchain/document"
+import type { Document } from "langchain/document"
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
