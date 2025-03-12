@@ -8,7 +8,7 @@ import { Progress } from '@/components/ui/progress';
 import { Textarea } from '@/components/ui/textarea'
 import axios from 'axios';
 import { Database, LucideLoader2, MoveUp, RefreshCcw } from 'lucide-react'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useState } from 'react'
 
 const VectorDBPage = () => {
 
@@ -18,7 +18,7 @@ const VectorDBPage = () => {
 
   const onUploadStart = useCallback(async () => {
     setIsLoading(true);
-    const response = await axios.post('/api/uploadDatabase', {
+    const response = await axios.post('/api/updateDatabase', {
       indexName,
       namespace,
     })
@@ -28,8 +28,6 @@ const VectorDBPage = () => {
 
     setIsLoading(false);
   }, [indexName, namespace])
-
-  useEffect
 
   return (
     <main className='flex flex-col min-h-screen items-center justify-center p-24'>

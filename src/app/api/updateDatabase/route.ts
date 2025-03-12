@@ -8,17 +8,20 @@ import { NextResponse } from "next/server";
 export async function POST (req: Request) {
   try {
     const { indexName, namespace } = await req.json();
-    await handleUpload(indexName, namespace);
+    const response = await handleUpload(indexName, namespace);
+    return response;
   } catch (error) {
     return NextResponse.json({ error: "Failed to process request" }, { status: 500 });
   }
 }
 
 async function handleUpload(indexName: string, namespace: string) {
-  const loader = new DirectoryLoader('./../../documents', {
-    '.pdf': (path: string) => new PDFLoader(path, {
+  const loader = new DirectoryLoader('./documents', {
+    '.pdf': (path: string) =>{ 
+      console.log('pdf detected:', path);
+      return new PDFLoader(path, {
       splitPages: false,
-    }),
+    })},
     '.txt': (path: string) => new TextLoader(path),
   })
 
