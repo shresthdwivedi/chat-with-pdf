@@ -18,7 +18,6 @@ export async function POST (req: Request) {
 async function handleUpload(indexName: string, namespace: string) {
   const loader = new DirectoryLoader('./documents', {
     '.pdf': (path: string) =>{ 
-      console.log('pdf detected:', path);
       return new PDFLoader(path, {
       splitPages: false,
     })},
