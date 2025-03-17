@@ -16,32 +16,36 @@ export async function POST (req: Request) {
 }
 
 async function handleUpload(indexName: string, namespace: string) {
-  const loader = new DirectoryLoader('./documents', {
-    '.pdf': (path: string) =>{ 
-      return new PDFLoader(path, {
-      splitPages: false,
-    })},
-    '.txt': (path: string) => new TextLoader(path),
-  })
+  const encoder = new TextEncoder();
+  const stream = new ReadableStream({
+    async start(controller) {
+      const loader = new DirectoryLoader('./documents', {
+        '.pdf': (path: string) => new PDFLoader(path, { splitPages: false }),
+        '.txt': (path: string) => new TextLoader(path),
+      });
 
-  const docs = await loader.load();
-  const client = new Pinecone({
-    apiKey: process.env.PINECONE_API_KEY!,
-  })
+      const docs = await loader.load();
+      const client = new Pinecone({ apiKey: process.env.PINECONE_API_KEY! });
 
-  let response = null;
+      await updateVectorDB(client, indexName, namespace, docs, (fileName, totalChunks, chunksUpserted, isComplete) => {
+        const chunkData = `${fileName}-${totalChunks}-${chunksUpserted}-${isComplete}`;
+        console.log(chunkData); // ✅ This should now be logged on the frontend!
 
-  await updateVectorDB(client, indexName, namespace, docs, (fileName, totalChunks, chunksUpserted, isComplete) => {
-    if (!isComplete) {
-      response = NextResponse.json({
-        fileName,
-        totalChunks,
-        chunksUpserted,
-        isComplete
-      })
+        // Push data to stream
+        controller.enqueue(encoder.encode(chunkData));
+        
+        if (isComplete) {
+          controller.close();
+        }
+      });
     }
   });
 
-  return response || NextResponse.json({ message: "Upload completed" });
-
+  return new Response(stream, {
+    headers: {
+      "Content-Type": "text/plain",
+      "Transfer-Encoding": "chunked",
+    },
+  });
 }
+

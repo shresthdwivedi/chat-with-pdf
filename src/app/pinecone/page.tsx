@@ -6,7 +6,6 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Progress } from '@/components/ui/progress';
 import { Textarea } from '@/components/ui/textarea'
-import axios from 'axios';
 import { Database, LucideLoader2, MoveUp, RefreshCcw } from 'lucide-react'
 import { useCallback, useState } from 'react'
 
@@ -15,19 +14,46 @@ const VectorDBPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [indexName, setIndexName] = useState('');
   const [namespace, setNamespace] = useState('');
+  const [fileName, setFileName] = useState('');
+  const [progress, setProgress] = useState(0);
 
   const onUploadStart = useCallback(async () => {
+    setProgress(0);
+    setFileName('');
     setIsLoading(true);
-    const response = await axios.post('/api/updateDatabase', {
-      indexName,
-      namespace,
-    })
+    const response = await fetch('/api/updateDatabase', {
+      method: 'POST',
+      body: JSON.stringify({
+        indexName,
+        namespace,
+      })
+    });
     console.log(response);
-
-    // await processStreamedProgress(response);
-
+    await processStreamedProgress(response);
+    
     setIsLoading(false);
-  }, [indexName, namespace])
+  }, [indexName, namespace]);
+  
+  async function processStreamedProgress(response: Response) {
+    const reader = response.body?.getReader();
+    if (!reader) {
+      console.error('No reader found');
+      return;
+    }
+    try {
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) {
+          setIsLoading(false);
+          break;
+        }
+        const data = new TextDecoder().decode(value);
+        console.log(data);
+      }
+    } catch (error) {
+      console.error("Stream processing error:", error);
+    }
+  };
 
   return (
     <main className='flex flex-col min-h-screen items-center justify-center p-24'>
@@ -70,9 +96,9 @@ const VectorDBPage = () => {
           </div>
           {isLoading && (
             <div className='mt-4'>
-              <Label>File Name:</Label>
+              <Label>File Name: {fileName}</Label>
               <div className='flex flex-row items-center gap-4'>
-                <Progress value={80} className=''/>
+                <Progress value={progress} className=''/>
                 <LucideLoader2 className='stroke-red-800 animate-spin'/>
               </div>
             </div>
@@ -85,3 +111,4 @@ const VectorDBPage = () => {
 }
 
 export default VectorDBPage
+
